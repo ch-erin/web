@@ -2,8 +2,8 @@
   <div class="canvas">
     <component v-for="item in canvasDataList" :key="item.id" :is="item.component"
       v-bind="{ ...item.props, ...item.attrs }" :style="item.style" draggable="true"
-      @dragstart="handleDragStart($event, item)" @dragend="handleDragEnd" @click="handleComponentClick($event, item.id)"
-      class="draggable-component" />
+      @dragstart="handleDragStart($event, item)" @dragend="handleDragEnd"
+      @click="handleComponentClick($event, item.id)" />
   </div>
 </template>
 
@@ -11,57 +11,52 @@
 import { ref } from "vue";
 import { useCanvasStore } from "@/stores/canvasData";
 
+// 获取画布数据
 const canvasStore = useCanvasStore();
 const { canvasDataList, selectCanvasData } = canvasStore;
 canvasStore.loadCanvasData();
 
+// 拖拽状态
 const dragItem = ref<any>(null);
 const dragImage = ref<any>(null);
-const originalOpacity = ref<string>("");
+const isDragging = ref(false);
 
+// 拖拽开始
 const handleDragStart = (event: DragEvent, item: any) => {
-  const dragElement = event.target as HTMLElement;
   dragItem.value = item;
+  isDragging.value = true;
 
-  // 保存原始透明度
-  originalOpacity.value = dragElement.style.opacity;
-  dragElement.style.opacity = "0.01"; // 半透明效果
+  // 获取正在拖拽的元素
+  const dragElement = event.target as HTMLElement;
 
   // 创建拖拽镜像
   dragImage.value = dragElement.cloneNode(true) as HTMLElement;
 
-  // 设置镜像样式
-  dragImage.value.style.position = 'fixed';
+  // 设置镜像样式，保持原样并给其一个浮动的效果
+  dragImage.value.style.position = 'absolute';
   dragImage.value.style.pointerEvents = 'none';
-  dragImage.value.style.opacity = '0.7';
+  dragImage.value.style.opacity = '0.02';
   dragImage.value.style.zIndex = '9999';
-  dragImage.value.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-  dragImage.value.style.transition = 'none'; // 禁用过渡效果
 
-  // 计算镜像位置
-  const rect = dragElement.getBoundingClientRect();
-  dragImage.value.style.left = `${rect.left}px`;
-  dragImage.value.style.top = `${rect.top}px`;
-
+  // 将镜像添加到页面上（它会随着鼠标移动）
   document.body.appendChild(dragImage.value);
 
-  // 设置拖拽图像和偏移
-  const offsetX = event.clientX - rect.left;
-  const offsetY = event.clientY - rect.top;
+  // 通过 dragstart 事件设置镜像的拖拽位置
+  const offsetX = event.clientX - dragElement.getBoundingClientRect().left;
+  const offsetY = event.clientY - dragElement.getBoundingClientRect().top;
 
-  if (event.dataTransfer) {
-    event.dataTransfer.setDragImage(dragImage.value, offsetX, offsetY);
-    event.dataTransfer.setData("application/json", JSON.stringify(item));
-  }
+  if (!event.dataTransfer) return;
+  event.dataTransfer.setDragImage(dragImage.value, offsetX, offsetY);
+  event.dataTransfer.setData("application/json", JSON.stringify(item));
 };
 
+// 拖拽结束
 const handleDragEnd = () => {
-  // 恢复原始元素状态
+  // 隐藏原组件
   if (dragItem.value) {
     const dragElement = document.querySelector(`[data-id='${dragItem.value.id}']`) as HTMLElement;
     if (dragElement) {
-      dragElement.style.opacity = originalOpacity.value;
-      dragElement.style.transform = "translate(0, 0)"; // 重置变换
+      dragElement.style.visibility = "hidden"; // 隐藏原组件
     }
   }
 
@@ -71,13 +66,25 @@ const handleDragEnd = () => {
     dragImage.value = null;
   }
 
+  // 恢复原组件可见
+  setTimeout(() => {
+    if (dragItem.value) {
+      const dragElement = document.querySelector(`[data-id='${dragItem.value.id}']`) as HTMLElement;
+      if (dragElement) {
+        dragElement.style.visibility = "visible";
+      }
+    }
+  }, 0);
+
+  isDragging.value = false;
   dragItem.value = null;
 };
 
 const handleComponentClick = (event: MouseEvent, id: string) => {
-  event.stopPropagation();
-  selectCanvasData(id);
+  event.stopPropagation(); // 阻止事件冒泡，避免触发画布的点击事件
+  selectCanvasData(id); // 调用选中组件的逻辑
 };
+
 </script>
 
 <style scoped lang="scss">
@@ -88,22 +95,17 @@ const handleComponentClick = (event: MouseEvent, id: string) => {
   padding: 20px;
 }
 
-.draggable-component {
+.canvas>* {
   padding: 10px;
   border: 1px solid #ddd;
   background-color: #fff;
   cursor: grab;
-  transition: all 0.2s ease; // 添加平滑过渡
+  transform: translate(1px, 1px);
+}
 
-  &:active {
-    cursor: grabbing;
-    transition: none; // 拖拽时禁用过渡
-  }
-
-  &.drag-overlay {
-    opacity: 0.7 !important;
-    transform: scale(1.02);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
+/* 可选的，拖拽时让原组件的透明度变为 0，以便更明显地看到镜像 */
+.canvas>*[draggable="true"]:active {
+  opacity: 0;
+  transform: translate(1px, 1px);
 }
 </style>
