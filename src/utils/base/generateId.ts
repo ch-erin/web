@@ -1,0 +1,1 @@
+export const setGenerateId = () => Math.random().toString(36).substring(2, 11)

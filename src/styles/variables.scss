@@ -1,0 +1,37 @@
+// 颜色
+$primary: #3b82f6;
+$primary-dark: #2563eb;
+$secondary: #8b5cf6;
+$gray-600: #4b5563;
+$gray-800: #1f2937;
+$white: #ffffff;
+
+// 阴影
+$shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+$shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+$shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+$shadow-outline: 0 0 0 3px rgb(59 130 246 / 0.5);
+
+// 圆角
+$rounded-sm: 0.375rem;
+$rounded-md: 0.75rem;
+$rounded-lg: 1.25rem;
+
+// 间距
+$spacing-1: 0.25rem;
+$spacing-2: 0.5rem;
+$spacing-3: 0.75rem;
+$spacing-4: 1rem;
+$spacing-5: 1.25rem;
+$spacing-6: 1.5rem;
+
+// 字体
+$font-size-sm: 0.875rem;
+$font-size-base: 1rem;
+$font-size-lg: 1.25rem;
+$font-size-xl: 1.5rem;
+$font-size-2xl: 1.75rem;
+
+// 过渡
+$transition-duration: 0.2s;
+$transition-timing: ease;
