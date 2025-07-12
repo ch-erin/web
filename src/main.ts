@@ -7,15 +7,11 @@ import 'element-plus/dist/index.css';
 import '@/styles/reset.css'
 import '@/assets/iconfont/iconfont.css'
 import GlobalKeyboardPlugin from './plugins/global-keyboard';
-import VueKonva from 'vue-konva';
-
 
 
 const app = createApp(App)
 const pinia = createPinia();
 
-
-app.use(VueKonva)
 app.use(GlobalKeyboardPlugin);
 app.use(ElementPlus)
 app.use(pinia);

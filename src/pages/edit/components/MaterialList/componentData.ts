@@ -7,7 +7,7 @@ export const componentMap: { [key: string]: any } = {
   "v-text": VText,
   "v-input": VInput,
   "v-image": VImage,
-  "v-icon": VIcon
+  "v-icon": VIcon,
 };
 
 const commonContainerStyle = {

@@ -1,16 +1,11 @@
 <template>
-  <div>
-
-    <A />
-
-  </div>
+  <ChildComponent>
+    <p>父组件插入的内容</p>
+  </ChildComponent>
 </template>
 
 <script setup lang="ts">
-import A from './child.vue'
-//import B from './parent.vue'
-
-
+import ChildComponent from './child.vue'
 </script>
 
 <style scoped lang="scss"></style>

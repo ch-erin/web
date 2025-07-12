@@ -1,5 +1,5 @@
 export const validateCredentials = {
-    username: (rule: any, value: string, callback: Function) => {
+    username: (value: string, callback: Function) => {
         if (!value) {
             callback(new Error('用户名不能为空'))
         } else if (value.length < 3) {
@@ -9,7 +9,7 @@ export const validateCredentials = {
         }
     },
 
-    password: (rule: any, value: string, callback: Function) => {
+    password: (value: string, callback: Function) => {
         if (!value) {
             callback(new Error('密码不能为空'))
         } else if (value.length < 6) {

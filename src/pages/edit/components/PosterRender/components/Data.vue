@@ -2,8 +2,8 @@
   <div class="canvas">
     <component v-for="item in canvasDataList" :key="item.id" :is="item.component"
       v-bind="{ ...item.props, ...item.attrs }" :style="item.style" draggable="true"
-      @dragstart="handleDragStart($event, item)" @dragend="handleDragEnd"
-      @click="handleComponentClick($event, item.id)" />
+      @dragstart="handleDragStart($event, item)" @dragend="handleDragEnd" @click="handleComponentClick($event, item.id)"
+      class="draggable-component" />
   </div>
 </template>
 
@@ -11,80 +11,47 @@
 import { ref } from "vue";
 import { useCanvasStore } from "@/stores/canvasData";
 
-// 获取画布数据
 const canvasStore = useCanvasStore();
 const { canvasDataList, selectCanvasData } = canvasStore;
 canvasStore.loadCanvasData();
 
-// 拖拽状态
 const dragItem = ref<any>(null);
-const dragImage = ref<any>(null);
-const isDragging = ref(false);
+const initialTransform = ref({ x: 0, y: 0 });
 
-// 拖拽开始
 const handleDragStart = (event: DragEvent, item: any) => {
-  dragItem.value = item;
-  isDragging.value = true;
-
-  // 获取正在拖拽的元素
   const dragElement = event.target as HTMLElement;
+  dragItem.value = item;
 
-  // 创建拖拽镜像
-  dragImage.value = dragElement.cloneNode(true) as HTMLElement;
+  // 记录初始位置
+  const rect = dragElement.getBoundingClientRect();
+  initialTransform.value = {
+    x: event.clientX - rect.left,
+    y: event.clientY - rect.top
+  };
 
-  // 设置镜像样式，保持原样并给其一个浮动的效果
-  dragImage.value.style.position = 'absolute';
-  dragImage.value.style.pointerEvents = 'none';
-  dragImage.value.style.opacity = '0.02';
-  dragImage.value.style.zIndex = '9999';
+  // 设置拖拽视觉效果
+  dragElement.classList.add('dragging');
 
-  // 将镜像添加到页面上（它会随着鼠标移动）
-  document.body.appendChild(dragImage.value);
-
-  // 通过 dragstart 事件设置镜像的拖拽位置
-  const offsetX = event.clientX - dragElement.getBoundingClientRect().left;
-  const offsetY = event.clientY - dragElement.getBoundingClientRect().top;
-
-  if (!event.dataTransfer) return;
-  event.dataTransfer.setDragImage(dragImage.value, offsetX, offsetY);
-  event.dataTransfer.setData("application/json", JSON.stringify(item));
+  // 创建透明拖拽图像
+  if (event.dataTransfer) {
+    const transparentImg = new Image();
+    transparentImg.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    event.dataTransfer.setDragImage(transparentImg, 0, 0);
+    event.dataTransfer.setData("application/json", JSON.stringify(item));
+  }
 };
 
-// 拖拽结束
-const handleDragEnd = () => {
-  // 隐藏原组件
-  if (dragItem.value) {
-    const dragElement = document.querySelector(`[data-id='${dragItem.value.id}']`) as HTMLElement;
-    if (dragElement) {
-      dragElement.style.visibility = "hidden"; // 隐藏原组件
-    }
-  }
-
-  // 移除镜像
-  if (dragImage.value) {
-    dragImage.value.remove();
-    dragImage.value = null;
-  }
-
-  // 恢复原组件可见
-  setTimeout(() => {
-    if (dragItem.value) {
-      const dragElement = document.querySelector(`[data-id='${dragItem.value.id}']`) as HTMLElement;
-      if (dragElement) {
-        dragElement.style.visibility = "visible";
-      }
-    }
-  }, 0);
-
-  isDragging.value = false;
+const handleDragEnd = (event: DragEvent) => {
+  const dragElement = event.target as HTMLElement;
+  dragElement.classList.remove('dragging');
+  dragElement.style.removeProperty('transform');
   dragItem.value = null;
 };
 
 const handleComponentClick = (event: MouseEvent, id: string) => {
-  event.stopPropagation(); // 阻止事件冒泡，避免触发画布的点击事件
-  selectCanvasData(id); // 调用选中组件的逻辑
+  event.stopPropagation();
+  selectCanvasData(id);
 };
-
 </script>
 
 <style scoped lang="scss">
@@ -95,17 +62,26 @@ const handleComponentClick = (event: MouseEvent, id: string) => {
   padding: 20px;
 }
 
-.canvas>* {
+.draggable-component {
   padding: 10px;
   border: 1px solid #ddd;
   background-color: #fff;
   cursor: grab;
-  transform: translate(1px, 1px);
-}
+  transition:
+    transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28),
+    box-shadow 0.2s ease;
 
-/* 可选的，拖拽时让原组件的透明度变为 0，以便更明显地看到镜像 */
-.canvas>*[draggable="true"]:active {
-  opacity: 0;
-  transform: translate(1px, 1px);
+  &.dragging {
+    cursor: grabbing;
+    opacity: 0.9;
+    transform: scale(1.02) translate(var(--dx, 0), var(--dy, 0));
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    transition: none;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
 }
 </style>

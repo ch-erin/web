@@ -10,5 +10,6 @@ export const json_urls = {
     "Create": canvas_base_url + 'create',
     "Update": canvas_base_url + 'update',
     "Delete": canvas_base_url + 'delete',
-    "Get": canvas_base_url + 'get'
+    "Get": canvas_base_url + 'get',
+    "GetAll": canvas_base_url + 'getAll',
 }

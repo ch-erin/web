@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import axios from 'axios';
 import { json_urls } from '@/api/auth';
 
-const { Create, Update, Delete, Init, Get } = json_urls;
+const { Create, Update, Delete, Get, GetAll } = json_urls;
 
 export const useProjectsStore = defineStore('projects', {
     state: () => ({
@@ -11,6 +11,7 @@ export const useProjectsStore = defineStore('projects', {
             name: string;
             description: string;
             createdAt: string;
+            updateTime: string;
             componentData: any;
         }[]
     }),
@@ -96,13 +97,21 @@ export const useProjectsStore = defineStore('projects', {
         // 初始化项目数据
         async initProjects() {
             try {
-                const response = await axios.post(Init);
-                console.log('Projects initialized successfully:', response.data);
-
-                // 更新本地状态
-                this.projects = response.data.projects; // 假设后端返回项目数据
+                const response = await this.getAllProjects()
+                this.projects = response.data || [];
             } catch (error) {
                 console.error('Error initializing projects:', error);
+                throw error;
+            }
+        },
+
+        // 获取所有项目
+        async getAllProjects() {
+            try {
+                const response = await axios.get(GetAll);
+                return response.data;
+            } catch (error) {
+                console.error('Error fetching all projects:', error);
                 throw error;
             }
         },
