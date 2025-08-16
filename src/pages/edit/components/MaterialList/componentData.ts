@@ -1,5 +1,5 @@
 import { shallowRef } from "vue";
-import { VButton, VText, VInput, VImage, VIcon } from "@/components/MaterialList/index.ts";
+import { VButton, VText, VInput, VImage, VIcon, VTable } from "@/components/MaterialList/index.ts";
 import * as ElementPlusIconsVue from "@element-plus/icons-vue";
 
 export const componentMap: { [key: string]: any } = {
@@ -8,6 +8,7 @@ export const componentMap: { [key: string]: any } = {
   "v-input": VInput,
   "v-image": VImage,
   "v-icon": VIcon,
+  "v-table": VTable,
 };
 
 const commonContainerStyle = {
@@ -199,5 +200,41 @@ export const iconList = shallowRef([
       ...commonStyle,
     },
     containerStyle: { ...commonContainerStyle },
+  },
+]);
+export const tableList = shallowRef([
+  {
+    name: "v-table",
+    component: VTable,
+    isLock: false,
+    attrs: {
+      propValue: [
+        { name: '张三', age: 25, city: '北京' },
+        { name: '李四', age: 30, city: '上海' },
+        { name: '王五', age: 28, city: '广州' }
+      ],
+      columns: [
+        { prop: 'name', label: '姓名', width: '120px', align: 'center' },
+        { prop: 'age', label: '年龄', width: '100px', align: 'center' },
+        { prop: 'city', label: '城市', width: '120px', align: 'center' }
+      ],
+      border: true,
+      stripe: false,
+      size: 'default',
+      icon: "el-icon-s-grid",
+      label: "表格",
+    },
+    style: {
+      width: "400px",
+      height: "300px",
+      position: "absolute",
+      transform: "rotate(0deg)",
+      ...commonStyle
+    },
+    containerStyle: {
+      ...commonContainerStyle,
+      width: "200px",
+      height: "120px"
+    },
   },
 ]);

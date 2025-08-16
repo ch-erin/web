@@ -1,61 +1,89 @@
 <template>
-    <table class="v-table">
-        <tbody>
-            <tr v-for="(item, index) in propValue.data" :key="index" :class="{
-                stripe: propValue.stripe && index % 2,
-                bold: propValue.thBold && index === 0,
-            }">
-                <td v-for="(e, i) in item" :key="i">{{ e }}</td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="v-table-container" :style="elementStyle">
+        <el-table
+            :data="tableData"
+            :style="tableStyle"
+            :height="elementStyle.height"
+            :border="tableBorder"
+            :stripe="tableStripe"
+            :size="tableSize"
+        >
+            <el-table-column
+                v-for="column in columns"
+                :key="column.prop"
+                :prop="column.prop"
+                :label="column.label"
+                :width="column.width"
+                :align="column.align"
+            />
+        </el-table>
+    </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, toRefs } from 'vue';
 
-const props = defineProps({
-    propValue: {
-        type: Object,
-        default: () => ({
-            data: [],
-            stripe: false,
-            thBold: false,
-        }),
-    },
+interface Column {
+  prop: string;
+  label: string;
+  width?: string;
+  align?: 'left' | 'center' | 'right';
+}
+
+interface Props {
+  propValue?: any[];
+  columns?: Column[];
+  border?: boolean;
+  stripe?: boolean;
+  size?: 'large' | 'default' | 'small';
+  element?: {
+    style?: Record<string, any>;
+  };
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  propValue: () => [
+    { name: '张三', age: 25, city: '北京' },
+    { name: '李四', age: 30, city: '上海' },
+    { name: '王五', age: 28, city: '广州' }
+  ],
+  columns: () => [
+    { prop: 'name', label: '姓名', width: '120px', align: 'center' },
+    { prop: 'age', label: '年龄', width: '100px', align: 'center' },
+    { prop: 'city', label: '城市', width: '120px', align: 'center' }
+  ],
+  border: true,
+  stripe: false,
+  size: 'default'
 });
 
-const tableData = ref([
-    ['Header 1', 'Header 2', 'Header 3'],
-    ['Row 1, Col 1', 'Row 1, Col 2', 'Row 1, Col 3'],
-    ['Row 2, Col 1', 'Row 2, Col 2', 'Row 2, Col 3'],
-]);
+const { propValue, columns, border, stripe, size, element } = toRefs(props);
 
-if (!props.propValue.data || props.propValue.data.length === 0) {
-    props.propValue.data = tableData.value;
-}
+const tableData = computed(() => propValue.value);
+const tableBorder = computed(() => border.value);
+const tableStripe = computed(() => stripe.value);
+const tableSize = computed(() => size.value);
+
+const elementStyle = computed(() => ({
+  width: '400px',
+  height: '300px',
+  ...element?.value?.style
+}));
+
+const tableStyle = computed(() => ({
+  width: '100%',
+  fontSize: element?.value?.style?.fontSize || '14px'
+}));
 </script>
 
-<style lang="scss" scoped>
-.v-table {
-    border-collapse: collapse;
-    table-layout: fixed;
-    word-break: break-all;
-    word-wrap: break-word;
+<style scoped lang="scss">
+.v-table-container {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 
-    td {
-        border: 1px solid #ebeef5;
-        height: 40px;
-        width: 60px;
-        padding: 10px;
-    }
-
-    .bold {
-        font-weight: bold;
-    }
-
-    .stripe {
-        background-color: #fafafa;
-    }
+  :deep(.el-table) {
+    flex: 1;
+  }
 }
 </style>

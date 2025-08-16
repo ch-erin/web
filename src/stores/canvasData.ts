@@ -118,6 +118,67 @@ export const useCanvasStore = defineStore('canvas', {
             const jsonData = localStorage.getItem('canvasData');
             if (jsonData) {
                 this.setJsonData(jsonData);
+            } else {
+                // 添加一些测试数据用于拖拽测试
+                this.canvasDataList.push(
+                    {
+                        id: 'test-1',
+                        component: 'div',
+                        name: '测试组件1',
+                        style: {
+                            width: '200px',
+                            height: '60px',
+                            backgroundColor: '#f3f4f6',
+                            border: '1px solid #d1d5db',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '14px',
+                            color: '#374151'
+                        },
+                        props: {},
+                        attrs: {}
+                    },
+                    {
+                        id: 'test-2',
+                        component: 'div',
+                        name: '测试组件2',
+                        style: {
+                            width: '200px',
+                            height: '60px',
+                            backgroundColor: '#dbeafe',
+                            border: '1px solid #3b82f6',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '14px',
+                            color: '#1e40af'
+                        },
+                        props: {},
+                        attrs: {}
+                    },
+                    {
+                        id: 'test-3',
+                        component: 'div',
+                        name: '测试组件3',
+                        style: {
+                            width: '200px',
+                            height: '60px',
+                            backgroundColor: '#dcfce7',
+                            border: '1px solid #22c55e',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '14px',
+                            color: '#15803d'
+                        },
+                        props: {},
+                        attrs: {}
+                    }
+                );
             }
         },
 
@@ -147,6 +208,12 @@ export const useCanvasStore = defineStore('canvas', {
                     this.canvasDataList.splice(0, this.canvasDataList.length, ...parsedState);
                 }
             }
+        },
+
+        // 更新组件顺序
+        updateCanvasOrder(newList: any[]) {
+            this.pushHistory(); // 保存当前状态到历史栈
+            this.canvasDataList.splice(0, this.canvasDataList.length, ...newList);
         },
     },
 });

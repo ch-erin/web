@@ -4,7 +4,14 @@
             <el-button @click="handleJsonDialog">查看 JSON</el-button>
             <el-button @click="clearCanvas">清空画布</el-button>
             <el-button @click="handleExport">导出</el-button>
-            <el-button>导入</el-button>
+            <el-button @click="handleImport">导入</el-button>
+            <input
+                ref="fileInput"
+                type="file"
+                accept=".json"
+                @change="handleFileImport"
+                style="display: none;"
+            />
             <el-button @click="goToPreview">预览</el-button>
             <el-button @click="undo">撤销</el-button>
             <el-button @click="redo">重做</el-button>
@@ -48,6 +55,7 @@ const jsonData = ref("");
 const showGenerateDialog = ref(false);
 const projectName = ref("默认项目名称");
 const projectDescription = ref("默认项目介绍");
+const fileInput = ref<HTMLInputElement | null>(null);
 
 // 处理查看 JSON 弹窗
 const handleJsonDialog = () => {
@@ -172,6 +180,53 @@ const generateProject = (projectData: { name: string; description: string }) => 
         message: "项目已生成并保存",
         type: "success"
     });
+};
+
+// 触发文件选择
+const handleImport = () => {
+    fileInput.value?.click();
+};
+
+// 处理文件导入
+const handleFileImport = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+
+    if (!file) return;
+
+    if (!file.name.endsWith('.json')) {
+        ElMessage.error('请选择JSON格式的文件');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const content = e.target?.result as string;
+            const data = JSON.parse(content);
+
+            // 验证数据格式
+            if (!Array.isArray(data)) {
+                ElMessage.error('文件格式不正确，请选择有效的画布数据文件');
+                return;
+            }
+
+            // 导入数据
+            canvasStore.setJsonData(content);
+            ElMessage({
+                message: "数据导入成功",
+                type: "success"
+            });
+
+        } catch (error) {
+            ElMessage.error('文件解析失败，请检查文件格式');
+        }
+    };
+
+    reader.readAsText(file);
+
+    // 清空input值，允许重复选择同一文件
+    target.value = '';
 };
 
 

@@ -12,13 +12,14 @@
 
 <script setup lang="ts">
 import { reactive } from "vue";
-import { elementsList, textList, imageList, iconList } from "./componentData";
+import { elementsList, textList, imageList, iconList, tableList } from "./componentData";
 import ComponentRenderer from "./ComponentRenderer.vue";
 
 const tabElementList = elementsList;
 const tabTextList = textList;
 const tabIconList = iconList;
 const tabImageList = imageList;
+const tabTableList = tableList;
 
 const tabs = reactive([
   {
@@ -28,6 +29,10 @@ const tabs = reactive([
   {
     name: "文本",
     items: tabTextList,
+  },
+  {
+    name: "表格",
+    items: tabTableList,
   },
   {
     name: "图标",

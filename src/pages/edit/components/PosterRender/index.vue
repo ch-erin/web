@@ -1,8 +1,7 @@
 <template>
   <BackGroud>
-    <div id="editor" class="editor" ref="editor" @mousedown="handleMouseDown" @mousemove="handleMouseMove"
-      @mouseup="handleMouseUp" @dragover.prevent="handleDragOver" @drop.prevent="handleDropEvent"
-      @click.prevent="deselectCanvasData">
+    <div id="editor" class="editor" ref="editor" @dragover.prevent="handleDragOver" @drop.prevent="handleDropEvent"
+      @click.self="handleCanvasClick">
       <Grid />
       <DynamicCanvas />
     </div>
@@ -16,16 +15,14 @@ import Grid from "./components/Grid.vue";
 import DynamicCanvas from "./components/Data.vue";
 import BackGroud from "./components/BackGroud.vue";
 //import MarkLine from "./components/MarkLine.vue";
-import { handleDragOver, handleDrop } from "@/utils/Drag/index";
+import { handleDrop } from "@/utils/Drag/index";
 import { useCanvasStore } from "@/stores/canvasData";
 import { getRealComponent } from "@/utils/map/index";
 import { setGenerateId } from '@/utils/base/generateId'
 
-
 // 状态管理
 const editor = ref<HTMLDivElement | null>(null);
 const editorRect = ref<DOMRect | null>(null);
-const isDragging = ref(false);
 
 // 鼠标位置状态
 const mouseX = ref(0);
@@ -74,17 +71,16 @@ const upDateComponentToCanvas = (component: any) => {
   updateStyle(component);
 }
 
-const handleMouseDown = () => isDragging.value = true;
-const handleMouseUp = () => isDragging.value = false;
-
-const throttledMouseMoveHandler = throttle((event: MouseEvent) => {
+const throttledMouseMoveHandler = throttle((event: MouseEvent | DragEvent) => {
   const { x, y } = getRelativePosition(event);
   return { x, y }
 }, 64);
 
-const handleMouseMove = (event: MouseEvent) => {
-  if (!isDragging.value) return;
-  throttledMouseMoveHandler(event);
+// 处理外部拖拽悬停
+const handleDragOver = (event: DragEvent) => {
+  const { x, y } = throttledMouseMoveHandler(event);
+  mouseX.value = x;
+  mouseY.value = y;
 };
 
 // 拖拽结束逻辑
@@ -123,6 +119,12 @@ const teardownEditorRectListeners = () => {
   window.removeEventListener("scroll", updateEditorRect);
 };
 
+// 处理画布点击事件
+const handleCanvasClick = () => {
+  // 取消选择组件，这样会自动显示画布控制面板
+  deselectCanvasData();
+};
+
 onMounted(setupEditorRectListeners);
 onUnmounted(teardownEditorRectListeners);
 </script>
@@ -130,10 +132,15 @@ onUnmounted(teardownEditorRectListeners);
 <style scoped lang="scss">
 .editor {
   position: relative;
-  background: #fff;
+  background: #f5f5f5;
   margin: auto;
   height: 100%;
   width: 100%;
-  overflow: auto;
+  overflow: auto; // 改为auto支持滚动
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 20px;
+  box-sizing: border-box;
 }
 </style>

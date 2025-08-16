@@ -13,42 +13,52 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed } from "vue";
 import { useCanvasStore } from "@/stores/canvasData";
 
 const canvasStore = useCanvasStore();
-const canvasDataList = ref(canvasStore.canvasDataList); // 使用 ref 包装以确保响应性
-const curComponentIndex = ref(-1); // 当前选中的组件索引
+
+// 使用计算属性确保响应性
+const canvasDataList = computed(() => canvasStore.canvasDataList);
+const selectedId = computed(() => canvasStore.selectedId);
+
+// 获取当前选中组件的索引
+const curComponentIndex = computed(() => {
+    return canvasDataList.value.findIndex(item => item.id === selectedId.value);
+});
 
 // 上移组件
 const moveUp = (index: number) => {
     if (index > 0) {
+        canvasStore.pushHistory(); // 保存历史状态
         const temp = canvasDataList.value[index];
         canvasDataList.value[index] = canvasDataList.value[index - 1];
         canvasDataList.value[index - 1] = temp;
-        canvasStore.canvasDataList = [...canvasDataList.value]; // 更新 Vuex 状态
+        canvasStore.updateStore();
     }
 };
 
 // 下移组件
 const moveDown = (index: number) => {
     if (index < canvasDataList.value.length - 1) {
+        canvasStore.pushHistory(); // 保存历史状态
         const temp = canvasDataList.value[index];
         canvasDataList.value[index] = canvasDataList.value[index + 1];
         canvasDataList.value[index + 1] = temp;
-        canvasStore.canvasDataList = [...canvasDataList.value]; // 更新 Vuex 状态
+        canvasStore.updateStore();
     }
 };
 
 // 删除组件
 const deleteComponent = (index: number) => {
-    canvasDataList.value.splice(index, 1);
-    canvasStore.canvasDataList = [...canvasDataList.value]; // 更新 Vuex 状态
+    const componentId = canvasDataList.value[index].id;
+    canvasStore.deleteCanvasData(componentId);
 };
 
 // 设置当前选中的组件
 const setCurComponent = (index: number) => {
-    curComponentIndex.value = index;
+    const componentId = canvasDataList.value[index].id;
+    canvasStore.selectCanvasData(componentId);
 };
 </script>
 
